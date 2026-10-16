@@ -1,5 +1,5 @@
 """
-北航食堂消费记录 - 可视化面板
+Dining Trace 干饭指北 - 校园卡食堂消费可视化面板
 启动: streamlit run app.py
 """
 
@@ -13,7 +13,7 @@ from datetime import datetime, date
 from scraper.database import get_connection, init_db, get_statistics
 
 # ── 页面配置 ──
-st.set_page_config(page_title="北航干饭指北", page_icon="🍜", layout="wide")
+st.set_page_config(page_title="Dining Trace 干饭指北", page_icon="🍜", layout="wide")
 
 
 # ── Session 状态 ──
@@ -82,7 +82,7 @@ def sso_login(stu_no, password):
 
 # ── 侧边栏：登录 ──
 def sidebar_login():
-    st.sidebar.title("🍜 北航干饭指北")
+    st.sidebar.title("🍜 干饭指北")
     st.sidebar.caption("SSO 统一认证登录")
 
     if not st.session_state.logged_in:
@@ -91,6 +91,7 @@ def sidebar_login():
         stu = st.sidebar.text_input("学号", key="login_stu", placeholder="请输入学号")
         pwd = st.sidebar.text_input("密码", type="password", key="login_pwd",
                                      placeholder="统一认证密码")
+        st.sidebar.caption("⏳ 首次登录需拉取全部历史记录，可能需要 1 分钟以上")
         if st.sidebar.button("🚀 登录", type="primary", use_container_width=True):
             if stu and pwd:
                 res = sso_login(stu, pwd)
@@ -440,10 +441,10 @@ def main():
     logged_in, df = sidebar_login()
 
     if not logged_in or df is None:
-        st.title("🍜 北航干饭指北")
+        st.title("🍜 干饭指北")
         st.markdown("""
         ### 👈 请在左侧登录
-        使用 **北航统一认证** 学号和密码登录，即可查看你的食堂消费数据。
+        使用**校园统一认证**的学号和密码登录，即可查看你的食堂消费数据。
 
         ---
         **功能一览:**
@@ -452,6 +453,11 @@ def main():
         - ⏰ **吃了吗您呐？** — 用餐时间规律
         - 🎲 **是啊，吃什么？** — 随机食堂抽签
         - ⚔️ **PK 擂台** — 和室友比一比谁是干饭王
+
+        ---
+        ⏳ **第一次登录会比较慢**：要完成统一认证并翻页拉取你的全部历史流水，
+        通常几十秒，高峰时段**可能需要 1 分钟以上**，请耐心等待，不要反复点击登录。
+        之后每次只需增量补充新记录，会快很多。
         """)
         return
 
@@ -494,7 +500,7 @@ def main():
         section_pk(df_f, st.session_state.stu_no)
 
     st.divider()
-    st.caption(f"🍜 北航干饭指北 · 数据来源 pass.cc-pay.cn · {datetime.now():%Y-%m-%d %H:%M}")
+    st.caption(f"🍜 干饭指北 · 数据来源 pass.cc-pay.cn · {datetime.now():%Y-%m-%d %H:%M}")
 
 
 if __name__ == "__main__":

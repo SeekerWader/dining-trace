@@ -15,7 +15,7 @@ def _print(msg):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="北航食堂消费记录爬虫")
+    parser = argparse.ArgumentParser(description="校园卡食堂消费记录爬虫")
     sub = parser.add_subparsers(dest="command")
 
     # sso

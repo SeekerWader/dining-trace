@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-北航食堂消费分析系统 — 通过 SSO 统一认证自动爬取北航校园卡食堂消费记录，以交互式可视化仪表盘展示分析结果。核心数据来自第三方校园卡平台 cc-pay（pass.cc-pay.cn / mall.cc-pay.cn），**服务端行为不受本项目控制且曾多次变化**。
+北航食堂消费分析系统（对外称 Dining Trace / 干饭指北）— 通过 SSO 统一认证自动爬取校园卡食堂消费记录，以交互式可视化仪表盘展示分析结果。核心数据来自第三方校园卡平台（pass.cc-pay.cn / mall.cc-pay.cn），**服务端行为不受本项目控制且曾多次变化**。
+
+> 对外材料（README、界面文案、截图文案）一律**不出现校名**，统一用「校园统一认证」「校园卡平台」等中性说法；SSO 端点集中在 `scraper/config.py`，方便换学校。
 
 ## Launch
 
@@ -50,8 +52,8 @@ python fetch_data.py --stats           # 查看各学号本地数据范围/统�
 **数据流：** SSO 登录 → 获取 Cookie → 调用 mall.cc-pay.cn API → 存入 SQLite → Pandas 分析 → Plotly 图表 → Streamlit 展示
 
 - **app.py** 集成完整 SSO 登录 + 数据拉取：用户在浏览器输入学号密码即完成全流程；PK 擂台页可再登录一个"对手"学号。5 个标签页：消费总览、食堂分析、时间分析、随机推荐、PK 对战
-- **scraper/sso_login.py** 北航 CAS 协议自动登录：GET 登录页提 `execution` → POST → 手动跟随 302 链收 Cookie；已有 TGT(CASTGC) 时登录页直接 302，此时跳过表单直接跟链
-- **scraper/fetcher.py** 封装 mall.cc-pay.cn REST API：分页、去重、失败自动重试（网络抖动/被拒 3 次，间隔 2-4s 随机）
+- **scraper/sso_login.py** 校园 CAS 协议自动登录（通用实现，端点读 `config.SSO_BASE`）：GET 登录页提 `execution` → POST → 手动跟随 302 链收 Cookie；已有 TGT(CASTGC) 时登录页直接 302，此时跳过表单直接跟链
+- **scraper/fetcher.py** 封装校园卡平台 REST API：分页、去重、失败自动重试（网络抖动/被拒 3 次，间隔 2-4s 随机）
 - **scraper/database.py** 所有查询带可选 `stu_no` 实现多用户隔离；transactions 以 `UNIQUE(date, amount, mer_name, balance, tx_name, stu_no)` 去重
 - **fetch_data.py** `--stu-no`（拉取）、`--stats`（统计）两命令；**scraper/cli.py** 提供等价 argparse 版
 
@@ -64,7 +66,7 @@ python fetch_data.py --stats           # 查看各学号本地数据范围/统�
 
 ## 服务器端风控与韧性设计（2026-09 排查结论，重要）
 
-cc-pay / 北航网关在 2026 年夏加入了反爬风控（cookie 出现 `_zte_cid_`/`_zte_sid_`/`insert_cookie` 等标记），表现为：
+校园卡平台 / 校方网关在 2026 年夏加入了反爬风控（cookie 出现 `_zte_cid_`/`_zte_sid_`/`insert_cookie` 等标记），表现为：
 
 - **登录链偶发被"验证页"截断**：SSO POST 后跟 302 链时，某跳返回 200 验证页（而非继续 302），链结束于未达 cc-pay。判定成功的标准是拿到 **`.cc-pay.cn` 域的 `connect.sid`**；只有 6 个左右 SSO 域 cookie（CASTGC/_zte_*）即失败。`login()` 对此自动重试最多 3 次（间隔随机 2-4s）
 - **连续快速登录会触发限流/会话撤销**：短时间多次登录（多账号/多次点击）后，新会话可能立刻被服务器标记，`/api/user` 与 trades 都返回 401。界面操作间应留间隔；fetch 阶段失败会间隔 3-5s 自动重新登录一次

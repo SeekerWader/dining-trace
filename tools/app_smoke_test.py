@@ -122,8 +122,8 @@ def build_demo_df(stu_no, seed=1):
     import random
     import pandas as pd
     random.seed(seed)
-    canteens = ["学一食堂", "北区学生第三食堂", "学生第四食堂", "教工食堂", "沙河第一食堂",
-                "清真食堂", "沙河风味餐厅", "学二食堂"]
+    canteens = ["第一食堂", "第二食堂", "第三食堂", "第四食堂", "教工食堂",
+                "清真食堂", "风味餐厅", "西区食堂"]
     rows = []
     day = datetime(2025, 3, 1, 0, 0, 0)
     for i in range(130):

@@ -25,7 +25,7 @@ def make_raw_df(n=400):
     """构造与数据库读出来等价的原始 DataFrame（date 已 parse_dates）"""
     import random
     random.seed(7)
-    canteens = ["学一食堂", "北区学生第三食堂", "学生第四食堂", "教工食堂", "沙河第一食堂"]
+    canteens = ["第一食堂", "第二食堂", "第三食堂", "教工食堂", "西区食堂"]
     rows = []
     base = datetime(2025, 3, 1)
     for i in range(n):

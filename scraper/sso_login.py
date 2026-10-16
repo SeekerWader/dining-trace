@@ -1,14 +1,17 @@
-"""北航统一认证 SSO 自动登录
+"""校园统一认证（CAS）SSO 自动登录
+
+本模块实现的是通用的 CAS 协议流程，登录地址在 scraper/config.py 里配置
+（默认已填好一个可用的校园认证端点；换学校只需改配置，不用动本文件）。
 
 流程:
-  1. GET  sso.buaa.edu.cn/login?service=...  获取 execution 参数
-  2. POST sso.buaa.edu.cn/login              提交学号密码
-  3. 302 跟随重定向链，获取 pass.cc-pay.cn 的 Cookie
+  1. GET  {SSO_BASE}/login?service=...  获取 execution 参数
+  2. POST {SSO_BASE}/login              提交学号密码
+  3. 302 跟随重定向链，获取校园卡平台的 Cookie
 
 注意:
-  cc-pay / 校方网关目前带有风控(验证页)机制，登录链偶发在到达
-  cc-pay 之前就被一个 200 验证页截断。因此登录会自动重试几次，
-  只有拿到 cc-pay 域 Cookie(connect.sid) 才算成功。
+  校园卡平台 / 校方网关目前带有风控(验证页)机制，登录链偶发在到达
+  校园卡平台之前就被一个 200 验证页截断。因此登录会自动重试几次，
+  只有拿到校园卡平台域 Cookie(connect.sid) 才算成功。
 """
 
 import random
@@ -18,10 +21,11 @@ import os
 import time
 from urllib.parse import urljoin
 
-SSO_BASE = "https://sso.buaa.edu.cn"
-SERVICE_URL = "https://pass.cc-pay.cn/login"
+from .config import SSO_BASE, SSO_SERVICE_URL
+
+SERVICE_URL = SSO_SERVICE_URL
 LOGIN_URL = f"{SSO_BASE}/login?service={requests.utils.quote(SERVICE_URL, safe='')}"
-# 能证明已登录 cc-pay 的 Cookie 名（任意一个即可）
+# 能证明已登录校园卡平台的 Cookie 名（任意一个即可）
 CCPAY_SESSION_COOKIE = "connect.sid"
 
 # 登录尝试次数与间隔（随机化，避免触发风控）
@@ -43,7 +47,7 @@ def _print(msg):
 
 
 class SSOLogin:
-    """北航统一认证 SSO 登录器"""
+    """校园统一认证（CAS）SSO 登录器"""
 
     #: 明确失败原因（用户名密码错误 / 频繁 / 验证码），不值得自动重试
     FATAL_ERR_KEYWORDS = ("密码", "用户名", "频繁", "验证码", "锁定", "冻结", "风险")

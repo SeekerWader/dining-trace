@@ -1,4 +1,4 @@
-"""北航校园卡消费记录爬虫"""
+"""校园卡消费记录爬虫"""
 
 import random
 import requests

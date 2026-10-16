@@ -1,5 +1,5 @@
 """
-北航校园卡消费记录 - 一键抓取
+校园卡消费记录 - 一键抓取（Dining Trace / 干饭指北）
 
 用法:
   python fetch_data.py --stu-no 学号     SSO 自动登录拉取数据
