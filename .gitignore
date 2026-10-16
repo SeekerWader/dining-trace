@@ -1,0 +1,29 @@
+# 本地数据与私密材料 —— 绝不提交
+data/*.db
+data/cookies*.txt
+archive/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 临时文件
+*.tmp
+*.log

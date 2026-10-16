@@ -1,0 +1,46 @@
+name: smoke
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 数据变换逻辑冒烟测试
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/smoke_test.py
+
+      - name: app.py 无头集成测试
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/app_smoke_test.py
+
+      - name: 确认没有把隐私数据带进仓库
+        run: |
+          if git ls-files | grep -E '^(data/|archive/).*(\.db|cookies|\.docx|\.txt|\.png)$'; then
+            echo "::error::检测到隐私数据被纳入版本控制！"
+            exit 1
+          fi
+          echo "OK: 仓库中不含数据文件与归档材料"
